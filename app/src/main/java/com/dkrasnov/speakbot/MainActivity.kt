@@ -7,6 +7,7 @@ import com.dkrasnov.speakbot.di.ComponentHolder
 import com.dkrasnov.speakbot.extensions.log
 import com.dkrasnov.speakbot.speach_api.QueryInput
 import com.dkrasnov.speakbot.speach_api.di.SpeakApi
+import com.dkrasnov.speakbot.token.TokenProvider
 import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
@@ -14,6 +15,8 @@ class MainActivity : AppCompatActivity() {
 
     @Inject
     lateinit var speakApi: SpeakApi
+    @Inject
+    lateinit var tokenProvider: TokenProvider
 
     @SuppressLint("CheckResult")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -24,7 +27,13 @@ class MainActivity : AppCompatActivity() {
 
         ComponentHolder.applicationComponent().inject(this)
 
-        speakApi.doPostDetectIntent("kfc-demo-iybbyn", "120", queryInput)
+        tokenProvider.loadToken()
+            .doOnSuccess {
+                log("token: $it")
+            }
+            .flatMap {
+                speakApi.doPostDetectIntent("kfc-demo-iybbyn", "120", queryInput)
+            }
             .subscribeOn(Schedulers.io())
             .subscribe({
                 log(it.toString())

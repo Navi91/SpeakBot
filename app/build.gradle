@@ -40,6 +40,18 @@ dependencies {
     implementation "com.squareup.retrofit2:converter-gson:$retrofit_version"
     implementation "com.squareup.retrofit2:adapter-rxjava2:2.6.1"
     implementation 'com.squareup.okhttp3:logging-interceptor:4.0.1'
+    implementation("com.google.http-client:google-http-client:$google_api_client_version") {
+        exclude module: 'httpclient'
+        exclude module: 'jsr305'
+    }
+    implementation("com.google.api-client:google-api-client-android:$google_api_client_version"){
+        exclude module: 'httpclient'
+        exclude module: 'jsr305'
+    }
+    implementation("com.google.apis:google-api-services-language:v1-rev386-$google_api_client_version") {
+        exclude module: 'httpclient'
+        exclude module: 'jsr305'
+    }
 
     kapt "com.google.dagger:dagger-android-processor:$dagger_version"
     kapt "com.google.dagger:dagger-compiler:$dagger_version"
@@ -51,3 +63,14 @@ dependencies {
     androidTestImplementation 'androidx.test:runner:1.2.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 }
+
+task copySecretKey(type: Copy) {
+    println 'do it before build'
+    def File secretKey = file "service_account_key/kfc-demo-iybbyn-fe803151245a.json"
+    println 'do it before build file = ' + secretKey
+    from secretKey.getParent()
+    include secretKey.getName()
+    into 'src/main/res/raw'
+    rename secretKey.getName(), "credential.json"
+}
+preBuild.dependsOn(copySecretKey)
