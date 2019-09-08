@@ -20,6 +20,10 @@ class TokenProvider(private val context: Context, private val preferences: Prefe
             return Single.just(savedToken)
         }
 
+        return rerfeshToken()
+    }
+
+    fun rerfeshToken() : Single<String> {
         return Single.fromCallable {
             var accessToken = ""
             context.resources.openRawResource(R.raw.credential).use { stream ->

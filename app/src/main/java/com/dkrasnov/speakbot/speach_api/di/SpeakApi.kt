@@ -1,5 +1,6 @@
 package com.dkrasnov.speakbot.speach_api.di
 
+import com.dkrasnov.speakbot.speach_api.BotSpeakResponse
 import com.dkrasnov.speakbot.speach_api.QueryInput
 import io.reactivex.Single
 import retrofit2.http.Body
@@ -14,5 +15,5 @@ interface SpeakApi {
         @Path("project-id") projectId: String,
         @Path("session-id") sessionId: String,
         @Body queryInput: QueryInput
-    ): Single<Any>
+    ): Single<BotSpeakResponse>
 }

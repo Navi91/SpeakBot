@@ -58,7 +58,6 @@ class ChatActivity : MvpAppCompatActivity(), IChatView, RecognitionListener {
 
         ComponentHolder.applicationComponent().inject(this)
 
-
         speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this)
 
 
@@ -120,6 +119,8 @@ class ChatActivity : MvpAppCompatActivity(), IChatView, RecognitionListener {
 
         isRecordRunning = true
 
+
+        setRecordState()
         scaleUpRecordButton()
 
         val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)

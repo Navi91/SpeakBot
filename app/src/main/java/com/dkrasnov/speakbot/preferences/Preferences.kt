@@ -11,6 +11,7 @@ class Preferences(private val context: Context) {
         private const val SPEAK_BOT_PREFS = "speak_bot_prefs"
 
         private const val USER_MESSAGE_INDEX_PREF_KEY = "user_message_index_pref_key"
+        private const val SESSION_ID_PREF_KEY = "session_id_pref_key"
     }
 
     private val sharedPreferences = context.getSharedPreferences(SPEAK_BOT_PREFS, Context.MODE_PRIVATE)
@@ -29,6 +30,16 @@ class Preferences(private val context: Context) {
 
     private fun getUserMessageIndex(): Int {
         return sharedPreferences.getInt(USER_MESSAGE_INDEX_PREF_KEY, 0)
+    }
+
+    fun getSessionId(): String {
+        return sharedPreferences.getString(SESSION_ID_PREF_KEY, "") ?: ""
+    }
+
+    fun setSessionId(id: String) {
+        syncEdit {
+            putString(SESSION_ID_PREF_KEY, id)
+        }
     }
 
     @SuppressLint("ApplySharedPref")

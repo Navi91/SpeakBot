@@ -3,13 +3,14 @@ package com.dkrasnov.speakbot.di
 import android.app.Application
 import com.dkrasnov.speakbot.chat.ChatActivity
 import com.dkrasnov.speakbot.chat.ChatPresenter
+import com.dkrasnov.speakbot.chat.di.ChatModule
 import com.dkrasnov.speakbot.speach_api.di.SpeakApiModule
 import dagger.BindsInstance
 import dagger.Component
 import javax.inject.Singleton
 
 @Singleton
-@Component(modules = [AppModule::class, RetrofitModule::class, SpeakApiModule::class])
+@Component(modules = [AppModule::class, RetrofitModule::class, SpeakApiModule::class, ChatModule::class])
 interface AppComponent {
 
     @Component.Builder
