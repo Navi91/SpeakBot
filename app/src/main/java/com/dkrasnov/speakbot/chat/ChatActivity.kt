@@ -5,12 +5,15 @@ import android.animation.Animator
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.Bundle
+import android.speech.RecognitionListener
+import android.speech.RecognizerIntent
+import android.speech.SpeechRecognizer
 import android.view.MotionEvent
 import android.view.View
 import android.widget.Toast
 import androidx.annotation.StringRes
-import androidx.appcompat.app.AppCompatActivity
 import androidx.transition.TransitionManager
 import com.arellomobile.mvp.MvpAppCompatActivity
 import com.arellomobile.mvp.presenter.InjectPresenter
@@ -22,11 +25,11 @@ import com.dkrasnov.speakbot.speach_api.di.SpeakApi
 import com.dkrasnov.speakbot.token.TokenProvider
 import com.tbruyelle.rxpermissions2.RxPermissions
 import io.reactivex.disposables.Disposable
-import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.a_main.*
 import javax.inject.Inject
 
-class ChatActivity : MvpAppCompatActivity(), IChatView {
+
+class ChatActivity : MvpAppCompatActivity(), IChatView, RecognitionListener {
 
     companion object {
         private const val SCALE_UP_VALUE = 1.2f
@@ -43,6 +46,8 @@ class ChatActivity : MvpAppCompatActivity(), IChatView {
 
     private var recordButtonAnimator: Animator? = null
     private var permissionDisposable: Disposable? = null
+    private var isRecordRunning = false
+    private lateinit var speechRecognizer: SpeechRecognizer
 
     @SuppressLint("CheckResult")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -53,19 +58,23 @@ class ChatActivity : MvpAppCompatActivity(), IChatView {
 
         ComponentHolder.applicationComponent().inject(this)
 
-        tokenProvider.loadToken()
-            .doOnSuccess {
-                log("token: $it")
-            }
-            .flatMap {
-                speakApi.doPostDetectIntent("kfc-demo-iybbyn", "120", queryInput)
-            }
-            .subscribeOn(Schedulers.io())
-            .subscribe({
-                log(it.toString())
-            }, {
-                log(it)
-            })
+
+        speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this)
+
+
+//        tokenProvider.loadToken()
+//            .doOnSuccess {
+//                log("token: $it")
+//            }
+//            .flatMap {
+//                speakApi.doPostDetectIntent("kfc-demo-iybbyn", "120", queryInput)
+//            }
+//            .subscribeOn(Schedulers.io())
+//            .subscribe({
+//                log(it.toString())
+//            }, {
+//                log(it)
+//            })
 
         recordButton.setOnTouchListener { _, event ->
             when {
@@ -73,17 +82,17 @@ class ChatActivity : MvpAppCompatActivity(), IChatView {
                     log("request start record")
 
                     if (checkPermission()) {
-                        scaleUpRecordButton()
-                        presenter.onStartRecord()
+                        startRecord()
                     } else {
                         requestPermissions()
                     }
                 }
                 event.action == MotionEvent.ACTION_UP || event.action == MotionEvent.ACTION_CANCEL -> {
-                    log("cancel record")
+                    log("request cancel record")
 
-                    scaleDownRecordButton()
-                    presenter.onStopRecord()
+                    if (isRecordRunning) {
+                        stopRecord()
+                    }
                 }
             }
 
@@ -95,6 +104,46 @@ class ChatActivity : MvpAppCompatActivity(), IChatView {
         super.onStop()
 
         permissionDisposable?.dispose()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        speechRecognizer.run {
+            stopListening()
+            destroy()
+        }
+    }
+
+    private fun startRecord() {
+        log("start record")
+
+        isRecordRunning = true
+
+        scaleUpRecordButton()
+
+        val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
+        intent.putExtra(
+            RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+            RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
+        )
+        intent.putExtra(
+            RecognizerIntent.EXTRA_CALLING_PACKAGE,
+            "com.dkrasnov.speakbot"
+        )
+
+        speechRecognizer.setRecognitionListener(this)
+        speechRecognizer.startListening(intent)
+    }
+
+    private fun stopRecord() {
+        log("stop record")
+
+        isRecordRunning = false
+
+        scaleDownRecordButton()
+
+        speechRecognizer.cancel()
     }
 
     override fun setRecordState() {
@@ -123,6 +172,50 @@ class ChatActivity : MvpAppCompatActivity(), IChatView {
 
     override fun showError(message: String?) {
         Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+    }
+
+    override fun onReadyForSpeech(params: Bundle?) {
+        log("ready for speech $params")
+    }
+
+    override fun onRmsChanged(rmsdB: Float) {
+//        log("on rms changed $rmsdB")
+    }
+
+    override fun onBufferReceived(buffer: ByteArray?) {
+        log("on buffer received")
+    }
+
+    override fun onPartialResults(partialResults: Bundle?) {
+        log("on partial results $partialResults")
+    }
+
+    override fun onEvent(eventType: Int, params: Bundle?) {
+        log("on event $eventType $params")
+    }
+
+    override fun onBeginningOfSpeech() {
+        log("on beginning of speech")
+    }
+
+    override fun onEndOfSpeech() {
+        log("on end of speech")
+
+//        stopRecord()
+    }
+
+    override fun onError(error: Int) {
+        log("on error $error")
+
+//        stopRecord()
+    }
+
+    override fun onResults(results: Bundle?) {
+        val voices = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+
+        log("on results $voices")
+
+        presenter.onVoiceMessage(voices?.firstOrNull())
     }
 
     private fun scaleUpRecordButton() {
