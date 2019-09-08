@@ -1,11 +1,98 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="AppTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:textColor">@color/primaryTextColor</item>
+    </style>
+
+    <style name="AppTextView" />
+
+    <style name="AppTextView.White">
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+
+    <style name="AppTextView.White.Center">
+        <item name="android:gravity">center</item>
+    </style>
+
+    <style name="AppTextView.14">
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="AppTextView.16">
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <style name="AppTextView.18">
+        <item name="android:textSize">18sp</item>
+    </style>
+
+    <style name="AppTextView.16.Secondary">
+        <item name="android:textColor">@color/secondaryTextColor</item>
+    </style>
+
+    <style name="AppTextView.18.Secondary">
+        <item name="android:textColor">@color/secondaryTextColor</item>
+    </style>
+
+    <style name="AppTextView.14.White">
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+
+    <style name="AppTextView.16.White">
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+
+    <style name="AppTextView.18.White">
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+
+    <style name="AppTextView.16.Secondary.Center">
+        <item name="android:gravity">center</item>
+    </style>
+
+    <style name="AppTextView.18.Center">
+        <item name="android:gravity">center</item>
+    </style>
+
+    <style name="AppTextView.18.Secondary.Center">
+        <item name="android:gravity">center</item>
+    </style>
+
+    <style name="AppTextView.16.Secondary.Center.AllCaps">
+        <item name="android:textAllCaps">true</item>
+    </style>
+
+    <style name="AppTextView.18.Secondary.Center.AllCaps">
+        <item name="android:textAllCaps">true</item>
+    </style>
+
+    <style name="AppTextView.16.Secondary.Center.AllCaps.Bold">
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="AppTextView.24">
+        <item name="android:textSize">24sp</item>
+    </style>
+
+    <style name="AppTextView.24.Accent">
+        <item name="android:textColor">?colorAccent</item>
+    </style>
+
+    <style name="AppTextView.24.Center">
+        <item name="android:gravity">center</item>
+    </style>
+
+    <style name="AppTextView.24.Accent.Center">
+        <item name="android:gravity">center</item>
+    </style>
+
+    <style name="AppTextView.24.Secondary">
+        <item name="android:textColor">@color/secondaryTextColor</item>
     </style>
 
 </resources>

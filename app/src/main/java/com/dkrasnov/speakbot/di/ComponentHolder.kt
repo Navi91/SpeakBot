@@ -1,7 +1,6 @@
 package com.dkrasnov.speakbot.di
 
 import android.app.Application
-import com.dkrasnov.speakbot.MainActivity
 
 object ComponentHolder {
 

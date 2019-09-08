@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">SpeakBot</string>
+    <string name="say">Говорите</string>
+    <string name="say_something">Скажите что-нибудь</string>
+    <string name="processing_message">Обработка сообщения</string>
+    <string name="send_request_to_server">Отправка запроса на сервер</string>
+    <string name="processing_server_response">Обработка ответа</string>
+    <string name="your_message">Ваше сообщение</string>
+    <string name="response">Ответ</string>
 </resources>

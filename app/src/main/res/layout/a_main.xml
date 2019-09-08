@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/contentLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".chat.ChatActivity">
+
+    <TextView
+        android:id="@+id/stateTextView"
+        style="@style/AppTextView.24.Center"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="@string/say_something"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/userMessageTextView"
+        style="@style/AppTextView.18.Center"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_margin="16dp"
+        android:hint="@string/your_message"
+        app:layout_constraintBottom_toTopOf="@+id/botMessageTextView"
+        app:layout_constraintTop_toBottomOf="@+id/stateTextView"
+        tools:text="Привет" />
+
+    <TextView
+        android:id="@+id/botMessageTextView"
+        style="@style/AppTextView.18.Center"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_margin="16dp"
+        android:hint="@string/response"
+        app:layout_constraintBottom_toTopOf="@+id/recordButton"
+        app:layout_constraintTop_toBottomOf="@+id/userMessageTextView"
+        tools:text="Купи Твистер!!!" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/recordButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="24dp"
+        android:src="@drawable/ic_mic_black_24dp"
+        android:tint="@android:color/white"
+        app:backgroundTint="?colorAccent"
+        app:fabSize="normal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

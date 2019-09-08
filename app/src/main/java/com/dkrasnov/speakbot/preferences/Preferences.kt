@@ -10,10 +10,26 @@ class Preferences(private val context: Context) {
 
         private const val SPEAK_BOT_PREFS = "speak_bot_prefs"
 
-        private const val ACCESS_TOKEN_PREF_KEY = "access_token_pref_key"
+        private const val USER_MESSAGE_INDEX_PREF_KEY = "user_message_index_pref_key"
     }
 
     private val sharedPreferences = context.getSharedPreferences(SPEAK_BOT_PREFS, Context.MODE_PRIVATE)
+
+    fun getAndIncrementUserMessageInde(): Int {
+        val index = getUserMessageIndex()
+        incrementUserMessageIndex()
+        return index
+    }
+
+    private fun incrementUserMessageIndex() {
+        syncEdit {
+            putInt(USER_MESSAGE_INDEX_PREF_KEY, getUserMessageIndex() + 1)
+        }
+    }
+
+    private fun getUserMessageIndex(): Int {
+        return sharedPreferences.getInt(USER_MESSAGE_INDEX_PREF_KEY, 0)
+    }
 
     @SuppressLint("ApplySharedPref")
     fun syncEdit(edit: SharedPreferences.Editor.() -> Unit) {
@@ -22,5 +38,5 @@ class Preferences(private val context: Context) {
         editor.commit()
     }
 
-    fun getString(key: String, defaultValue: String = "") : String? = sharedPreferences.getString(key, defaultValue)
+    fun getString(key: String, defaultValue: String = ""): String? = sharedPreferences.getString(key, defaultValue)
 }

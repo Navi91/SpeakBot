@@ -1,7 +1,8 @@
 package com.dkrasnov.speakbot.di
 
 import android.app.Application
-import com.dkrasnov.speakbot.MainActivity
+import com.dkrasnov.speakbot.chat.ChatActivity
+import com.dkrasnov.speakbot.chat.ChatPresenter
 import com.dkrasnov.speakbot.speach_api.di.SpeakApiModule
 import dagger.BindsInstance
 import dagger.Component
@@ -20,6 +21,7 @@ interface AppComponent {
         fun build(): AppComponent
     }
 
-    fun inject(mainActivity: MainActivity)
+    fun inject(chatActivity: ChatActivity)
+    fun inject(chatActivity: ChatPresenter)
 
 }
