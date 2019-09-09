@@ -15,7 +15,23 @@ class GetBotMessageUseCase(
 ) {
 
     fun getBotMessage(userMessage: String): Single<String> {
-        return tokenProvider.loadToken().flatMap {
+
+        return getBotMessageWithTokenProvider(userMessage, tokenProvider.loadToken()).onErrorResumeNext {
+            log("get bot message error: ${it.message}")
+
+            if (it is HttpException && it.code() == 401) {
+                log("is auth exception")
+
+                return@onErrorResumeNext getBotMessageWithTokenProvider(userMessage, tokenProvider.rerfeshToken())
+            }
+
+            Single.error(it)
+        }
+
+    }
+
+    private fun getBotMessageWithTokenProvider(userMessage: String, tokenProvider: Single<String>) : Single<String> {
+        return tokenProvider.flatMap {
             val projectId = "kfc-demo-iybbyn"
             val queryInput = QueryInput.create(userMessage)
             val sessionId = preferences.getSessionId()
@@ -27,15 +43,6 @@ class GetBotMessageUseCase(
             log("server response $it")
 
             it.message
-        }.onErrorResumeNext {
-            log("get bot message error: ${it.message}")
-
-            if (it is HttpException && it.code() == 401) {
-                log("is auth exception")
-            }
-
-            Single.error(it)
         }
-
     }
 }

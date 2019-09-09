@@ -10,7 +10,7 @@ import android.os.Bundle
 import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
-import android.view.MotionEvent
+import android.speech.tts.TextToSpeech
 import android.view.View
 import android.widget.Toast
 import androidx.annotation.StringRes
@@ -20,16 +20,16 @@ import com.arellomobile.mvp.presenter.InjectPresenter
 import com.dkrasnov.speakbot.R
 import com.dkrasnov.speakbot.di.ComponentHolder
 import com.dkrasnov.speakbot.extensions.log
-import com.dkrasnov.speakbot.speach_api.QueryInput
 import com.dkrasnov.speakbot.speach_api.di.SpeakApi
 import com.dkrasnov.speakbot.token.TokenProvider
 import com.tbruyelle.rxpermissions2.RxPermissions
 import io.reactivex.disposables.Disposable
 import kotlinx.android.synthetic.main.a_main.*
+import java.util.*
 import javax.inject.Inject
 
 
-class ChatActivity : MvpAppCompatActivity(), IChatView, RecognitionListener {
+class ChatActivity : MvpAppCompatActivity(), IChatView, RecognitionListener, TextToSpeech.OnInitListener {
 
     companion object {
         private const val SCALE_UP_VALUE = 1.2f
@@ -48,54 +48,49 @@ class ChatActivity : MvpAppCompatActivity(), IChatView, RecognitionListener {
     private var permissionDisposable: Disposable? = null
     private var isRecordRunning = false
     private lateinit var speechRecognizer: SpeechRecognizer
+    private lateinit var textToSpeech: TextToSpeech
 
     @SuppressLint("CheckResult")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.a_main)
 
-        val queryInput = QueryInput.create("Привет")
-
         ComponentHolder.applicationComponent().inject(this)
 
         speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this)
+        textToSpeech = TextToSpeech(this, this)
 
-
-//        tokenProvider.loadToken()
-//            .doOnSuccess {
-//                log("token: $it")
+//        recordButton.setOnTouchListener { _, event ->
+//            when {
+//                event.action == MotionEvent.ACTION_DOWN -> {
+//                    log("request start record")
+//
+//                    if (checkPermission()) {
+//                        startRecord()
+//                    } else {
+//                        requestPermissions()
+//                    }
+//                }
+//                event.action == MotionEvent.ACTION_UP || event.action == MotionEvent.ACTION_CANCEL -> {
+//                    log("request cancel record")
+//
+//                    if (isRecordRunning) {
+//                        stopRecord()
+//                    }
+//                }
 //            }
-//            .flatMap {
-//                speakApi.doPostDetectIntent("kfc-demo-iybbyn", "120", queryInput)
-//            }
-//            .subscribeOn(Schedulers.io())
-//            .subscribe({
-//                log(it.toString())
-//            }, {
-//                log(it)
-//            })
+//
+//            return@setOnTouchListener false
+//        }
 
-        recordButton.setOnTouchListener { _, event ->
-            when {
-                event.action == MotionEvent.ACTION_DOWN -> {
-                    log("request start record")
+        recordButton.setOnClickListener {
+            log("request start record")
 
-                    if (checkPermission()) {
-                        startRecord()
-                    } else {
-                        requestPermissions()
-                    }
-                }
-                event.action == MotionEvent.ACTION_UP || event.action == MotionEvent.ACTION_CANCEL -> {
-                    log("request cancel record")
-
-                    if (isRecordRunning) {
-                        stopRecord()
-                    }
-                }
+            if (checkPermission()) {
+                startRecord()
+            } else {
+                requestPermissions()
             }
-
-            return@setOnTouchListener false
         }
     }
 
@@ -119,7 +114,7 @@ class ChatActivity : MvpAppCompatActivity(), IChatView, RecognitionListener {
 
         isRecordRunning = true
 
-
+        recordButton.isEnabled = false
         setRecordState()
         scaleUpRecordButton()
 
@@ -142,9 +137,8 @@ class ChatActivity : MvpAppCompatActivity(), IChatView, RecognitionListener {
 
         isRecordRunning = false
 
+        recordButton.isEnabled = true
         scaleDownRecordButton()
-
-        speechRecognizer.cancel()
     }
 
     override fun setRecordState() {
@@ -169,6 +163,26 @@ class ChatActivity : MvpAppCompatActivity(), IChatView, RecognitionListener {
 
     override fun setBotMessage(message: String) {
         botMessageTextView.text = message
+
+        textToSpeech.speak(message, TextToSpeech.QUEUE_ADD, null)
+    }
+
+    override fun onInit(status: Int) {
+        log("on text to speech init status: $status")
+
+        if (status == TextToSpeech.SUCCESS) {
+            val setLanguageResult = textToSpeech.setLanguage(Locale.forLanguageTag("ru"))
+
+            if (setLanguageResult == TextToSpeech.LANG_MISSING_DATA || setLanguageResult == TextToSpeech.LANG_NOT_SUPPORTED) {
+                log("Language not supported")
+                showError("Russian not supported")
+            } else {
+                log("Language install success")
+            }
+        } else {
+            log("Text to speech install failed")
+            showError("Text to speech install failed")
+        }
     }
 
     override fun showError(message: String?) {
@@ -202,13 +216,13 @@ class ChatActivity : MvpAppCompatActivity(), IChatView, RecognitionListener {
     override fun onEndOfSpeech() {
         log("on end of speech")
 
-//        stopRecord()
+        stopRecord()
     }
 
     override fun onError(error: Int) {
         log("on error $error")
 
-//        stopRecord()
+        stopRecord()
     }
 
     override fun onResults(results: Bundle?) {
