@@ -29,7 +29,8 @@ import java.util.*
 import javax.inject.Inject
 
 
-class ChatActivity : MvpAppCompatActivity(), IChatView, RecognitionListener, TextToSpeech.OnInitListener {
+class ChatActivity : MvpAppCompatActivity(), IChatView, RecognitionListener,
+    TextToSpeech.OnInitListener {
 
     companion object {
         private const val SCALE_UP_VALUE = 1.2f
@@ -49,6 +50,9 @@ class ChatActivity : MvpAppCompatActivity(), IChatView, RecognitionListener, Tex
     private var isRecordRunning = false
     private lateinit var speechRecognizer: SpeechRecognizer
     private lateinit var textToSpeech: TextToSpeech
+    private val params = hashMapOf<String, String>().apply {
+        put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "speak_bot_utterance_id")
+    }
 
     @SuppressLint("CheckResult")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -60,28 +64,12 @@ class ChatActivity : MvpAppCompatActivity(), IChatView, RecognitionListener, Tex
         speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this)
         textToSpeech = TextToSpeech(this, this)
 
-//        recordButton.setOnTouchListener { _, event ->
-//            when {
-//                event.action == MotionEvent.ACTION_DOWN -> {
-//                    log("request start record")
-//
-//                    if (checkPermission()) {
-//                        startRecord()
-//                    } else {
-//                        requestPermissions()
-//                    }
-//                }
-//                event.action == MotionEvent.ACTION_UP || event.action == MotionEvent.ACTION_CANCEL -> {
-//                    log("request cancel record")
-//
-//                    if (isRecordRunning) {
-//                        stopRecord()
-//                    }
-//                }
-//            }
-//
-//            return@setOnTouchListener false
-//        }
+        textToSpeech.setOnUtteranceCompletedListener {
+            log("on text to speech completed $it")
+            runOnUiThread {
+                startRecord()
+            }
+        }
 
         recordButton.setOnClickListener {
             log("request start record")
@@ -164,7 +152,8 @@ class ChatActivity : MvpAppCompatActivity(), IChatView, RecognitionListener, Tex
     override fun setBotMessage(message: String) {
         botMessageTextView.text = message
 
-        textToSpeech.speak(message, TextToSpeech.QUEUE_ADD, null)
+
+        textToSpeech.speak(message, TextToSpeech.QUEUE_ADD, params)
     }
 
     override fun onInit(status: Int) {
@@ -268,7 +257,10 @@ class ChatActivity : MvpAppCompatActivity(), IChatView, RecognitionListener, Tex
 
     private fun requestPermissions() {
         permissionDisposable =
-            RxPermissions(this).request(Manifest.permission.RECORD_AUDIO, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            RxPermissions(this).request(
+                Manifest.permission.RECORD_AUDIO,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            )
                 .subscribe({
                     log("request permissions result: $it")
                 }, {
