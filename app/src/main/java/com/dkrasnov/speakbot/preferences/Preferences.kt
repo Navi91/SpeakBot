@@ -12,9 +12,11 @@ class Preferences(private val context: Context) {
 
         private const val USER_MESSAGE_INDEX_PREF_KEY = "user_message_index_pref_key"
         private const val SESSION_ID_PREF_KEY = "session_id_pref_key"
+        private const val LAST_USER_MESSAGE_TIME_PREF_KEY = "last_user_message_time_pref_key"
     }
 
-    private val sharedPreferences = context.getSharedPreferences(SPEAK_BOT_PREFS, Context.MODE_PRIVATE)
+    private val sharedPreferences =
+        context.getSharedPreferences(SPEAK_BOT_PREFS, Context.MODE_PRIVATE)
 
     fun getAndIncrementUserMessageInde(): Int {
         val index = getUserMessageIndex()
@@ -42,6 +44,16 @@ class Preferences(private val context: Context) {
         }
     }
 
+    fun getLastUserMessageTime(): Long {
+        return sharedPreferences.getLong(LAST_USER_MESSAGE_TIME_PREF_KEY, 0L)
+    }
+
+    fun setLastUserMessageTime(time: Long) {
+        syncEdit {
+            putLong(LAST_USER_MESSAGE_TIME_PREF_KEY, time)
+        }
+    }
+
     @SuppressLint("ApplySharedPref")
     fun syncEdit(edit: SharedPreferences.Editor.() -> Unit) {
         val editor = sharedPreferences.edit()
@@ -49,5 +61,6 @@ class Preferences(private val context: Context) {
         editor.commit()
     }
 
-    fun getString(key: String, defaultValue: String = ""): String? = sharedPreferences.getString(key, defaultValue)
+    fun getString(key: String, defaultValue: String = ""): String? =
+        sharedPreferences.getString(key, defaultValue)
 }

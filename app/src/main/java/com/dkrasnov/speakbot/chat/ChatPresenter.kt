@@ -12,10 +12,15 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import java.util.*
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 @InjectViewState
 class ChatPresenter : MvpPresenter<IChatView>() {
+
+    companion object {
+        private val SESSION_INTERVAL = TimeUnit.DAYS.toMillis(5)
+    }
 
     @Inject
     lateinit var context: Context
@@ -31,7 +36,7 @@ class ChatPresenter : MvpPresenter<IChatView>() {
 
         ComponentHolder.applicationComponent().inject(this)
 
-        preferences.setSessionId(UUID.randomUUID().toString())
+        updateSessionId()
     }
 
     override fun onDestroy() {
@@ -46,10 +51,13 @@ class ChatPresenter : MvpPresenter<IChatView>() {
             return
         }
 
+        updateSessionIdIfNeed()
+        preferences.setLastUserMessageTime(System.currentTimeMillis())
+
         viewState.setProcessingServerResponseState()
         viewState.setUserMessage(message)
 
-        disposable =  getBotMessageUseCase.getBotMessage(message)
+        disposable = getBotMessageUseCase.getBotMessage(message)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({
@@ -59,5 +67,21 @@ class ChatPresenter : MvpPresenter<IChatView>() {
             }, {
                 log("bot message error: $it")
             })
+    }
+
+    private fun updateSessionIdIfNeed() {
+        log("update session id if need current time: ${System.currentTimeMillis()} last message time: ${preferences.getLastUserMessageTime()}")
+
+        if (System.currentTimeMillis() - preferences.getLastUserMessageTime() > SESSION_INTERVAL) {
+            updateSessionId()
+        }
+    }
+
+    private fun updateSessionId() {
+        val sessionId = UUID.randomUUID().toString()
+
+        log("update session id: $sessionId")
+
+        preferences.setSessionId(sessionId)
     }
 }
