@@ -62,7 +62,7 @@ class ChatActivity : MvpAppCompatActivity(), IChatView, RecognitionListener,
         ComponentHolder.applicationComponent().inject(this)
 
         speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this)
-        textToSpeech = TextToSpeech(this, this)
+        textToSpeech = TextToSpeech(this, this, "com.google.android.tts")
 
         textToSpeech.setOnUtteranceCompletedListener {
             log("on text to speech completed $it")
@@ -95,6 +95,7 @@ class ChatActivity : MvpAppCompatActivity(), IChatView, RecognitionListener,
             stopListening()
             destroy()
         }
+        textToSpeech.shutdown()
     }
 
     private fun startRecord() {
@@ -152,8 +153,9 @@ class ChatActivity : MvpAppCompatActivity(), IChatView, RecognitionListener,
     override fun setBotMessage(message: String) {
         botMessageTextView.text = message
 
+        val speakMessage = message.replace("KFC", "кэй эф си")
 
-        textToSpeech.speak(message, TextToSpeech.QUEUE_ADD, params)
+        textToSpeech.speak(speakMessage, TextToSpeech.QUEUE_ADD, params)
     }
 
     override fun onInit(status: Int) {
